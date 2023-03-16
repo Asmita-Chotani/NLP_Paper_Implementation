@@ -6,8 +6,8 @@ from __future__ import print_function
 
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+# reload(sys)
+# sys.setdefaultencoding('utf8')
 
 import os
 import json
@@ -178,6 +178,7 @@ class Evaluator:
         predictions = {}
         prediction_txt = open(self.prediction_file, 'w')  # open the file to store the predictions
 
+        print(type(enumerate(loader)))
         for iter, batch in enumerate(loader):
             iter_start = time.time()
 

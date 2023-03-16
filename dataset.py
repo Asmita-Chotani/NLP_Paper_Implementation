@@ -6,8 +6,10 @@ from __future__ import print_function
 
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+
+# reload(sys)
+# sys.setdefaultencoding('utf8')
+
 import json
 import h5py
 import os
@@ -34,7 +36,7 @@ class VISTDataset(Dataset):
             'split_story': True,
             'caption': False
         }
-
+        h5py._errors.silence_errors()
         # open the hdf5 file
         print('DataLoader loading story h5 file: ', opt.story_h5)
         self.story_h5 = h5py.File(opt.story_h5, 'r', driver='core')['story']
@@ -89,20 +91,20 @@ class VISTDataset(Dataset):
         # write reference files for captioning
         for split in ['val', 'test']:
             reference = {}
-            for flickr_id, story in self.story_line['image2caption_original'][split].iteritems():
+            for flickr_id, story in self.story_line['image2caption_original'][split].items():
                 reference[flickr_id] = story
             with open(os.path.join(ref_dir, '{}_desc_reference.json'.format(split)), 'w') as f:
                 json.dump(reference, f)
 
     def __getitem__(self, index):
         if self.task == 'story_telling':
-            story_id = self.story_ids[self.mode][index]
+            story_id = list(self.story_ids[self.mode])[index]
             story = self.story_line[self.mode][story_id]
 
             # load feature
             feature_fc = np.zeros((story['length'], self.opt.feat_size), dtype='float32')
             feature_conv = np.zeros((story['length'], self.opt.conv_feat_size), dtype='float32')
-            for i in xrange(story['length']):
+            for i in range(story['length']):
                 # load fc feature
                 fc_path = os.path.join(self.opt.data_dir, 'resnet_features/fc', self.mode,
                                        '{}.npy'.format(story['flickr_id'][i]))
@@ -243,7 +245,7 @@ if __name__ == "__main__":
     start = time.time()
 
     dataset.train()
-    train_loader = DataLoader(dataset, batch_size=64, shuffle=opt.shuffle, num_workers=8)
+    train_loader = DataLoader(dataset, batch_size=64, shuffle=opt.shuffle, num_workers=0)
 
     print("dataloader finished: ", time.time() - start)
 

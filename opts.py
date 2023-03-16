@@ -10,8 +10,7 @@ def parse_opt():
     parser.add_argument('--id', type=str, default='default', help='an id identifying this run/job')
 
     # Data input settings
-    parser.add_argument('--data_dir', type=str, default='
-        VIST')
+    parser.add_argument('--data_dir', type=str, default='VIST')
     # parser.add_argument('--data_dir', type=str, default='../datasets/VIST')
     parser.add_argument('--desc_h5', type=str, default='VIST/description.h5')
     parser.add_argument('--story_h5', type=str, default='VIST/story.h5')

@@ -38,7 +38,7 @@ def main(params):
     compute_conv = params['feature_type'] == 'conv' or params['feature_type'] == 'both'
 
     net = getattr(resnet, params['model'])()
-    net.load_state_dict(torch.load(os.path.join(params['model_root'], params['model'] + '.pth')))
+    net.load_state_dict(torch.load(os.path.join(params['model_root'], params['model'] + '.pth'),map_location=torch.device('cpu')))
     my_resnet = myResnet(net)
     my_resnet.cuda()
     my_resnet.eval()

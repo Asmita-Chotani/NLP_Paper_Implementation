@@ -76,9 +76,9 @@ def train(opt):
     dataset.set_option(data_type={'whole_story': False, 'split_story': True, 'caption': False})
 
     dataset.train()
-    train_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=opt.shuffle, num_workers=opt.workers)
+    train_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=opt.shuffle, num_workers=0)
     dataset.val()
-    val_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=opt.workers)
+    val_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=0)
 
     ##################### set up model, criterion and optimizer ######
     bad_valid = 0
@@ -93,7 +93,7 @@ def train(opt):
 
     # set up model
     model = models.setup(opt)
-    model.cuda()
+    # model.cuda()
 
     # set up optimizer
     optimizer = setup_optimizer(opt, model)
@@ -161,7 +161,7 @@ def train(opt):
                         opt.learning_rate = opt.learning_rate / 2.0
                         logging.info("halve learning rate to {}".format(opt.learning_rate))
                         checkpoint_path = os.path.join(logger.log_dir, 'model-best.pth')
-                        model.load_state_dict(torch.load(checkpoint_path))
+                        model.load_state_dict(torch.load(checkpoint_path), map_location=torch.device('cpu'))
                         utils.set_lr(optimizer, opt.learning_rate)  # set the decayed rate
                         bad_valid = 0
                         logging.info("bad valid : {}".format(bad_valid))
@@ -177,10 +177,10 @@ def test(opt):
     opt.seq_length = dataset.get_story_length()
 
     dataset.test()
-    test_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=opt.workers)
+    test_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=0)
     evaluator = Evaluator(opt, 'test')
     model = models.setup(opt)
-    model.cuda()
+    # model.cuda()
     predictions, metrics = evaluator.test_story(model, dataset, test_loader, opt)
 
 

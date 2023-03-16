@@ -34,7 +34,7 @@ def setup(opt):
     elif opt.start_from_model is not None:
         if os.path.exists(opt.start_from_model):
             logging.info("Start from pretrained model")
-            model.load_state_dict(torch.load(opt.start_from_model))
+            model.load_state_dict(torch.load(opt.start_from_model, map_location=torch.device('cpu')))
         else:
             err_msg = "model path doesn't exist: {}".format(opt.start_from_model)
             logging.error(err_msg)

@@ -63,9 +63,9 @@ def train(opt):
     dataset.set_option(data_type={'whole_story': False, 'split_story': True, 'caption': False})
 
     dataset.train()
-    train_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=opt.shuffle, num_workers=opt.workers)
+    train_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=opt.shuffle, num_workers=0)
     dataset.val()
-    val_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=opt.workers)
+    val_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=0)
 
     ##################### set up model, criterion and optimizer ######
     bad_valid = 0
@@ -79,13 +79,13 @@ def train(opt):
 
     # set up model
     model = models.setup(opt)
-    model.cuda()
+    # model.cuda()
     disc_opt = copy.copy(opt)
     disc_opt.model = 'RewardModel'
     disc = models.setup(disc_opt)
     if os.path.exists(os.path.join(logger.log_dir, 'disc-model.pth')):
         logging.info("loading pretrained RewardModel")
-        disc.load_state_dict(torch.load(os.path.join(logger.log_dir, 'disc-model.pth')))
+        disc.load_state_dict(torch.load(os.path.join(logger.log_dir, 'disc-model.pth'), map_location=torch.device('cpu')))
     disc.cuda()
 
     # set up optimizer
@@ -215,10 +215,10 @@ def test(opt):
     opt.seq_length = dataset.get_story_length()
 
     dataset.test()
-    test_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=opt.workers)
+    test_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=0)
     evaluator = Evaluator(opt, 'test')
     model = models.setup(opt)
-    model.cuda()
+    # model.cuda()
     predictions, metrics = evaluator.test_story(model, dataset, test_loader, opt)
 
 

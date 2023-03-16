@@ -1,6 +1,6 @@
 __author__ = 'Licheng'
 from pprint import pprint
-#from tokenizer.ptbtokenizer import PTBTokenizer   ### Changes made by AG
+from .tokenizer.ptbtokenizer import PTBTokenizer
 from .bleu.bleu import Bleu
 from .meteor.meteor import Meteor
 from .rouge.rouge import Rouge
@@ -24,7 +24,7 @@ class AlbumEvaluator:
         # =================================================
         # Set up scorers
         # =================================================
-        print ('setting up scorers...') ### Changes made by AG
+        print ('setting up scorers...')
         scorers = []
         scorers = [
             (Bleu(4), ["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"]),
@@ -43,11 +43,11 @@ class AlbumEvaluator:
                 for sc, scs, m in zip(score, scores, method):
                     self.setEval(sc, m)
                     self.setAlbumToEval(scs, self.album_to_Gts.keys(), m)
-                    print(m, sc) ### Changes made by AG
+                    print ('%s: %.3f' % (m, sc))
             else:
                 self.setEval(score, method)
                 self.setAlbumToEval(scores, self.album_to_Gts.keys(), method)
-                print (method, score)  ### Changes made by AG
+                print ('%s: %.3f' % (method, score))
 
         self.setEvalAlbums()
 

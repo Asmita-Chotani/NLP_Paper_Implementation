@@ -100,7 +100,7 @@ class BaseModel(nn.Module):
         log_probs = F.log_softmax(self.logit(out_d[:, 0, :]))
 
         if penalize_previous:
-            last_word_onehot = torch.FloatTensor(last_word.size(0), self.vocab_size).zero_().cuda()
+            last_word_onehot = torch.FloatTensor(last_word.size(0), self.vocab_size).zero_()
             penalize_value = (last_word > 0).data.float() * -100
             mask = Variable(last_word_onehot.scatter_(1, last_word.data[:, None], 1.) * penalize_value[:, None])
             log_probs = log_probs + mask
@@ -317,7 +317,7 @@ class BaseModel(nn.Module):
             out_e_k = out_e[k].unsqueeze(0).expand(beam_size, out_e.size(1)).contiguous()
             state_d_k = state_d[:, k, :].unsqueeze(1).expand(state_d.size(0), beam_size, state_d.size(2)).contiguous()
 
-            last_word = Variable(torch.FloatTensor(beam_size).long().zero_().cuda())  # <BOS>
+            last_word = Variable(torch.FloatTensor(beam_size).long().zero_())  # <BOS>
             log_probs, state_d_k = self.decode(out_e_k, last_word, state_d_k, True)
             log_probs[:, 1] = log_probs[:, 1] - 1000  # never produce <UNK> token
             neg_log_probs = -log_probs
@@ -341,8 +341,8 @@ class BaseModel(nn.Module):
                 all_masks = all_masks[:, indexes]
                 all_costs = all_costs[:, indexes]
 
-                last_word = Variable(torch.from_numpy(outputs)).cuda()
-                state_d_k = Variable(torch.from_numpy(new_state_d)).cuda()
+                last_word = Variable(torch.from_numpy(outputs))
+                state_d_k = Variable(torch.from_numpy(new_state_d))
 
                 log_probs, state_d_k = self.decode(out_e_k, last_word, state_d_k, True)
 

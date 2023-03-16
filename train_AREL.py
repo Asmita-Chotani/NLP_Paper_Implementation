@@ -86,7 +86,7 @@ def train(opt):
     if os.path.exists(os.path.join(logger.log_dir, 'disc-model.pth')):
         logging.info("loading pretrained RewardModel")
         disc.load_state_dict(torch.load(os.path.join(logger.log_dir, 'disc-model.pth'), map_location=torch.device('cpu')))
-    disc.cuda()
+    #disc.cuda()
 
     # set up optimizer
     optimizer = setup_optimizer(opt, model)
@@ -102,10 +102,10 @@ def train(opt):
         start = time.time()
         for iter, batch in enumerate(train_loader):
             logger.iteration += 1
-            torch.cuda.synchronize()
+            #torch.cuda.synchronize()
 
-            feature_fc = Variable(batch['feature_fc']).cuda()
-            target = Variable(batch['split_story']).cuda()
+            feature_fc = Variable(batch['feature_fc'])
+            target = Variable(batch['split_story'])
             index = batch['index']
 
             optimizer.zero_grad()
@@ -125,7 +125,7 @@ def train(opt):
                 disc.eval()
                 seq, seq_log_probs, baseline = model.sample(feature_fc, sample_max=False, rl_training=True, pad=True)
 
-            seq = Variable(seq).cuda()
+            seq = Variable(seq)
             mask = (seq > 0).float()
             mask = to_contiguous(
                 torch.cat([Variable(mask.data.new(mask.size(0), mask.size(1), 1).fill_(1)), mask[:, :, :-1]], 2))
@@ -167,7 +167,7 @@ def train(opt):
                 optimizer.step()
 
             train_loss = loss.data[0]
-            torch.cuda.synchronize()
+            #torch.cuda.synchronize()
 
             # Write the training loss summary
             if logger.iteration % opt.losses_log_every == 0:

@@ -80,7 +80,7 @@ class ReinforceCriterion(nn.Module):
                     rewards.append(score)
             rewards = torch.FloatTensor(rewards)  # (batch_size,)
             avg_reward = rewards.mean()
-            rewards = Variable(rewards.view(batch_size, 1, 1).expand_as(seq)).cuda()
+            rewards = Variable(rewards.view(batch_size, 1, 1).expand_as(seq))
         else:
             avg_reward = rewards.mean()
             rewards = rewards.view(-1, 5, 1)

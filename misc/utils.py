@@ -49,11 +49,12 @@ def decode_story(id2word, result):
     """
     batch_size, story_size, seq_length = result.size()
     out = []
-    for i in xrange(batch_size):
+    for i in range(batch_size):
         txt = ''
-        for j in xrange(story_size):
-            for k in xrange(seq_length):
+        for j in range(story_size):
+            for k in range(seq_length):
                 vocab_id = result[i, j, k]
+                print(result[i, j])
                 if vocab_id > 0:
                     txt = txt + ' ' + id2word[str(vocab_id)]
                 else:
@@ -70,13 +71,13 @@ def post_process_story(id2word, result):
     """
     batch_size, story_size, beam_size, seq_length = result.shape
     out = []
-    for i in xrange(batch_size):
+    for i in range(batch_size):
         txts = []
         stories = []
-        for j in xrange(story_size):
-            for b in xrange(beam_size):
+        for j in range(story_size):
+            for b in range(beam_size):
                 txt = ''
-                for k in xrange(seq_length):
+                for k in range(seq_length):
                     vocab_id = result[i, j, b, k]
                     if vocab_id > 0:
                         txt = txt + ' ' + id2word[str(vocab_id)]

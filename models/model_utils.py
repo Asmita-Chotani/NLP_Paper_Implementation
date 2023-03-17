@@ -116,7 +116,7 @@ class VisualEncoder(nn.Module):
         out = self.relu(out)  # (batch_size, 5, embed_dim)
 
         if self.with_position:
-            for i in xrange(self.story_size):
+            for i in range(self.story_size):  ## AC
                 position = Variable(input.data.new(batch_size).long().fill_(i))
                 out[:, i, :] = out[:, i, :] + self.position_embed(position)
 

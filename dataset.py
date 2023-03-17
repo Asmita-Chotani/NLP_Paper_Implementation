@@ -202,7 +202,7 @@ class VISTDataset(Dataset):
 
     def get_id(self, index):
         if self.task == 'story_telling':
-            story_id = self.story_ids[self.mode][index]
+            story_id = list(self.story_ids[self.mode])[index] # changed - pn
             return self.story_line[self.mode][story_id]['album_id'], self.story_line[self.mode][story_id]['flickr_id']
         else:
             return self.description_ids[self.mode][index]

@@ -54,9 +54,8 @@ def decode_story(id2word, result):
         for j in range(story_size):
             for k in range(seq_length):
                 vocab_id = result[i, j, k]
-                print(result[i, j])
                 if vocab_id > 0:
-                    txt = txt + ' ' + id2word[str(vocab_id)]
+                    txt = txt + ' ' + id2word[str(int(vocab_id))] # changed - pn
                 else:
                     break
         out.append(txt)

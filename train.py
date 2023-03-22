@@ -132,7 +132,7 @@ def train(opt):
                 logging.info("average {} score: {}".format(opt.reward_type, avg_score))
 
             loss.backward()
-            train_loss = loss.data[0]
+            train_loss = loss.item()
 
             nn.utils.clip_grad_norm(model.parameters(), opt.grad_clip, norm_type=2)
             optimizer.step()

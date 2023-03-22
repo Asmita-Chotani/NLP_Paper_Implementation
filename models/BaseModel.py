@@ -127,7 +127,7 @@ class BaseModel(nn.Module):
         # state_d = self.init_hidden(batch_size, bi=False, dim=self.hidden_dim)
         state_d = self.init_hidden_with_feature(features)
 
-        last_word = Variable(torch.FloatTensor(batch_size).long().zero_()).cuda()
+        last_word = Variable(torch.FloatTensor(batch_size).long().zero_())
         outputs = []
 
         for i in range(self.seq_length):
@@ -136,7 +136,7 @@ class BaseModel(nn.Module):
 
             # choose the word
             if self.ss_prob > 0.0:
-                sample_prob = torch.FloatTensor(batch_size).uniform_(0, 1).cuda()
+                sample_prob = torch.FloatTensor(batch_size).uniform_(0, 1)
                 sample_mask = sample_prob < self.ss_prob
                 if sample_mask.sum() == 0:
                     last_word = caption[:, i].clone()
@@ -177,7 +177,7 @@ class BaseModel(nn.Module):
         if rl_training:
             baseline = []
 
-        last_word = torch.FloatTensor(batch_size).long().zero_().cuda()
+        last_word = torch.FloatTensor(batch_size).long().zero_()
         for t in range(self.seq_length):
             last_word = Variable(last_word)
 
@@ -185,7 +185,7 @@ class BaseModel(nn.Module):
             if t < 6:
                 mask = np.zeros((batch_size, log_probs.size(-1)), 'float32')
                 mask[:, 0] = -1000
-                mask = Variable(torch.from_numpy(mask)).cuda()
+                mask = Variable(torch.from_numpy(mask))
                 log_probs = log_probs + mask
 
             if sample_max:
@@ -194,7 +194,7 @@ class BaseModel(nn.Module):
             else:
                 # fetch prev distribution: shape Nx(M+1)
                 prob_prev = torch.exp(log_probs.data).cpu()
-                last_word = torch.multinomial(prob_prev, 1).cuda()
+                last_word = torch.multinomial(prob_prev, 1)
                 # gather the logprobs at sampled positions
                 sample_log_prob = log_probs.gather(1, Variable(last_word))
                 # flatten indices for downstream processing
@@ -251,7 +251,7 @@ class BaseModel(nn.Module):
             out_e_k = out_e[k].unsqueeze(0).expand(beam_size, out_e.size(1)).contiguous()
             state_d_k = state_d[:, k, :].unsqueeze(1).expand(state_d.size(0), beam_size, state_d.size(2)).contiguous()
 
-            last_word = Variable(torch.FloatTensor(beam_size).long().zero_().cuda())  # <BOS>
+            last_word = Variable(torch.FloatTensor(beam_size).long().zero_())  # <BOS>
             log_probs, state_d_k = self.decode(out_e_k, last_word, state_d_k, True)
             log_probs[:, 1] = log_probs[:, 1] - 1000  # never produce <UNK> token
             neg_log_probs = -log_probs
@@ -272,8 +272,8 @@ class BaseModel(nn.Module):
                 all_masks = all_masks[:, indexes]
                 all_costs = all_costs[:, indexes]
 
-                last_word = Variable(torch.from_numpy(outputs)).cuda()
-                state_d_k = Variable(torch.from_numpy(new_state_d)).cuda()
+                last_word = Variable(torch.from_numpy(outputs))
+                state_d_k = Variable(torch.from_numpy(new_state_d))
 
                 log_probs, state_d_k = self.decode(out_e_k, last_word, state_d_k, True)
 

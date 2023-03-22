@@ -129,7 +129,7 @@ class Evaluator:
                 else:
                     output = model(feature_fc, target)
 
-            loss = crit(output, target).data[0]
+            loss = crit(output, target).data
             loss_sum += loss
             loss_evals += 1
 

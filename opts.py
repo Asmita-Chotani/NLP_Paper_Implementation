@@ -41,7 +41,7 @@ def parse_opt():
                         help='whether to use position embedding for the image feature')
 
     # Optimization: General
-    parser.add_argument('--max_epochs', type=int, default=100,
+    parser.add_argument('--max_epochs', type=int, default=2,
                         help='number of epochs')
     parser.add_argument('--shuffle', type=bool, default=True,
                         help='set to True to have the data reshuffled at every epoch during training ')

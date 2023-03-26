@@ -40,7 +40,7 @@ def main(params):
     net = getattr(resnet, params['model'])()
     net.load_state_dict(torch.load(os.path.join(params['model_root'], params['model'] + '.pth'),map_location=torch.device('cpu')))
     my_resnet = myResnet(net)
-    my_resnet.cuda()
+    my_resnet #.cuda()
     my_resnet.eval()
 
     if compute_fc:
@@ -76,7 +76,7 @@ def main(params):
                 I = np.concatenate((I, I, I), axis=2)
 
             I = I.astype('float32') / 255.0
-            I = torch.from_numpy(I.transpose([2, 0, 1])).cuda()
+            I = torch.from_numpy(I.transpose([2, 0, 1])) #.cuda()
             I = Variable(preprocess(I), volatile=True)
             tmp_fc, tmp_conv = my_resnet(I, params['att_size'])
 

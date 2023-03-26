@@ -141,7 +141,7 @@ def train(opt):
                 avg_neg_score = torch.mean(gen_score)
 
                 if logger.iteration % 5 == 0:
-                    logging.info("pos reward {} neg reward {}".format(avg_pos_score.data, avg_neg_score.data))
+                    logging.info("pos reward {} neg reward {}".format(avg_pos_score.item(), avg_neg_score.item()))
                     # print("PREDICTION: ", utils.decode_story(dataset.get_vocab(), seq[:1].data)[0])
                     # print("GROUND TRUTH: ", utils.decode_story(dataset.get_vocab(), target[:1].data)[0])
             else:
@@ -166,8 +166,7 @@ def train(opt):
                 nn.utils.clip_grad_norm(model.parameters(), opt.grad_clip, norm_type=2)
                 optimizer.step()
 
-            # train_loss = loss.data[0]
-            train_loss = loss.data
+            train_loss = loss.item()
             #torch.cuda.synchronize()
 
             # Write the training loss summary

@@ -15,7 +15,8 @@ from .model_utils import AttentionLayer, VisualEncoder, _smallest
 
 
 def from_numpy(states):
-    return [Variable(torch.from_numpy(state)).cuda() for state in states]
+    return [Variable(torch.from_numpy(state)) for state in states]
+    # return [Variable(torch.from_numpy(state)).cuda() for state in states]
 
 
 class RewardModel(nn.Module):

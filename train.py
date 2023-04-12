@@ -112,7 +112,7 @@ def train(opt):
         for iter, batch in enumerate(train_loader):
             start = time.time()
             logger.iteration += 1
-            #torch.cuda.synchronize()
+            torch.cuda.synchronize()
 
             feature_fc = Variable(batch['feature_fc'])
             target = Variable(batch['split_story'])
@@ -136,7 +136,7 @@ def train(opt):
 
             nn.utils.clip_grad_norm(model.parameters(), opt.grad_clip, norm_type=2)
             optimizer.step()
-            #torch.cuda.synchronize()
+            torch.cuda.synchronize()
 
             logging.info("Epoch {} - Iter {} / {}, loss = {:.5f}, time used = {:.3f}s".format(epoch, iter,
                                                                                               len(train_loader),
@@ -180,7 +180,7 @@ def test(opt):
     test_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=0)
     evaluator = Evaluator(opt, 'test')
     model = models.setup(opt)
-    # model.cuda()
+    model.cuda()
     predictions, metrics = evaluator.test_story(model, dataset, test_loader, opt)
 
 

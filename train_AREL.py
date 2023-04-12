@@ -79,14 +79,14 @@ def train(opt):
 
     # set up model
     model = models.setup(opt)
-    # model.cuda()
+    model.cuda()
     disc_opt = copy.copy(opt)
     disc_opt.model = 'RewardModel'
     disc = models.setup(disc_opt)
     if os.path.exists(os.path.join(logger.log_dir, 'disc-model.pth')):
         logging.info("loading pretrained RewardModel")
         disc.load_state_dict(torch.load(os.path.join(logger.log_dir, 'disc-model.pth'), map_location=torch.device('cpu')))
-    # disc.cuda()
+    disc.cuda()
 
     # set up optimizer
     optimizer = setup_optimizer(opt, model)
@@ -102,15 +102,15 @@ def train(opt):
         start = time.time()
         for iter, batch in enumerate(train_loader):
             logger.iteration += 1
-            # torch.cuda.synchronize()
+            torch.cuda.synchronize()
 
-            # feature_fc = Variable(batch['feature_fc']).cuda()
-            # target = Variable(batch['split_story']).cuda()
-            # caption = Variable(batch['caption']).cuda()
+            feature_fc = Variable(batch['feature_fc']).cuda()
+            target = Variable(batch['split_story']).cuda()
+            caption = Variable(batch['caption']).cuda()
 
-            feature_fc = Variable(batch['feature_fc'])
-            target = Variable(batch['split_story'])
-            caption = Variable(batch['caption'])
+            # feature_fc = Variable(batch['feature_fc'])
+            # target = Variable(batch['split_story'])
+            # caption = Variable(batch['caption'])
             index = batch['index']
 
             # print(feature_fc.shape)
@@ -134,8 +134,8 @@ def train(opt):
                 disc.eval()
                 seq, seq_log_probs, baseline = model.sample(feature_fc, caption, sample_max=False, rl_training=True, pad=True)
 
-            # seq = Variable(seq).cuda()
-            seq = Variable(seq)
+            seq = Variable(seq).cuda()
+            # seq = Variable(seq)
             mask = (seq > 0).float()
             mask = to_contiguous(
                 torch.cat([Variable(mask.data.new(mask.size(0), mask.size(1), 1).fill_(1)), mask[:, :, :-1]], 2))
@@ -180,7 +180,7 @@ def train(opt):
                 optimizer.step()
 
             train_loss = loss.data.item()
-            # torch.cuda.synchronize()
+            torch.cuda.synchronize()
 
             # Write the training loss summary
             if logger.iteration % opt.losses_log_every == 0:
@@ -232,7 +232,7 @@ def test(opt):
     test_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=0)
     evaluator = Evaluator(opt, 'test')
     model = models.setup(opt)
-    # model.cuda()
+    model.cuda()
     predictions, metrics = evaluator.test_story(model, dataset, test_loader, opt)
 
 

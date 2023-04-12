@@ -110,22 +110,22 @@ class Evaluator:
         for iter, batch in enumerate(loader):
             iter_start = time.time()
 
-            # feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
-            # target = Variable(batch['split_story'], volatile=True).cuda()
-            # conv_feature = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
-            # caption = Variable(batch['caption'], volatile=True).cuda()
+            feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
+            target = Variable(batch['split_story'], volatile=True).cuda()
+            conv_feature = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
+            caption = Variable(batch['caption'], volatile=True).cuda()
 
-            feature_fc = Variable(batch['feature_fc'], volatile=True)
-            target = Variable(batch['split_story'], volatile=True)
-            conv_feature = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
-            caption = Variable(batch['caption'], volatile=True)
+            # feature_fc = Variable(batch['feature_fc'], volatile=True)
+            # target = Variable(batch['split_story'], volatile=True)
+            # conv_feature = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
+            # caption = Variable(batch['caption'], volatile=True)
 
             count += feature_fc.size(0)
 
             if side_model is not None:
                 story, _ = side_model.predict(feature_fc.view(-1, feature_fc.shape[2]), caption, 1)
-                # story = Variable(story).cuda()
-                story = Variable(story)
+                story = Variable(story).cuda()
+                # story = Variable(story)
                 if conv_feature is not None:
                     output = model(feature_fc, target, story, conv_feature, caption)
                 else:
@@ -189,13 +189,13 @@ class Evaluator:
         for iter, batch in enumerate(loader):
             iter_start = time.time()
 
-            # feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
-            # caption = Variable(batch['caption'], volatile=True).cuda()
-            # feature_conv = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
+            feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
+            caption = Variable(batch['caption'], volatile=True).cuda()
+            feature_conv = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
             
-            feature_fc = Variable(batch['feature_fc'], volatile=True)
-            caption = Variable(batch['caption'], volatile=True)
-            feature_conv = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
+            # feature_fc = Variable(batch['feature_fc'], volatile=True)
+            # caption = Variable(batch['caption'], volatile=True)
+            # feature_conv = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
             
 
             if feature_conv is not None:
@@ -243,11 +243,11 @@ class Evaluator:
         for iter, batch in enumerate(loader):
             iter_start = time.time()
 
-            # feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
-            # conv_feature = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
+            feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
+            conv_feature = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
             
-            feature_fc = Variable(batch['feature_fc'], volatile=True)
-            conv_feature = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
+            # feature_fc = Variable(batch['feature_fc'], volatile=True)
+            # conv_feature = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
 
             count += feature_fc.size(0)
             if conv_feature is not None:

@@ -15,8 +15,8 @@ from .model_utils import AttentionLayer, VisualEncoder, _smallest
 
 
 def from_numpy(states):
-    # return [Variable(torch.from_numpy(state)).cuda() for state in states]
-    return [Variable(torch.from_numpy(state)) for state in states]
+    return [Variable(torch.from_numpy(state)).cuda() for state in states]
+    # return [Variable(torch.from_numpy(state)) for state in states]
 
 
 class RewardModel(nn.Module):
@@ -50,8 +50,8 @@ class RewardModel(nn.Module):
     def forward(self, story, feature):
         embedding = Variable(self.emb(story).data)  # (batch_size, seq_length, embed_dim)
 
-        # self.convs = [model.cuda() for model in self.convs]
-        self.convs = [model for model in self.convs]
+        self.convs = [model.cuda() for model in self.convs]
+        # self.convs = [model for model in self.convs]
 
         # batch x seq_len x emb_dim -> batch x 1 x seq_len x emb_dim
         embedding = embedding.unsqueeze(1)

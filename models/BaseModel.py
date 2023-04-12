@@ -28,6 +28,14 @@ class BaseModel(nn.Module):
         self.decoder_input_dim = self.word_embed_dim + self.word_embed_dim
         self.ss_prob = 0.0  # Schedule sampling probability
 
+        self.kernel_num = 512
+        # self.kernels = [2, 3, 4, 5]
+        self.kernels = torch.randn(1, 20, 1, 1)
+        self.emb = nn.Embedding(self.vocab_size, 512)
+        # self.emb.weight.data.copy_(torch.from_numpy(np.load("VIST/embedding.npy")))
+        # self.convs = [nn.Conv2d(1, self.kernel_num, (k, self.word_embed_dim)) for k in self.kernels]
+        # self.conv = nn.Conv2d(5, 64, (20, 512))
+
         # Visual Encoder
         self.encoder = VisualEncoder(opt)
 
@@ -107,66 +115,95 @@ class BaseModel(nn.Module):
 
         return log_probs, state_d
 
-    def forward(self, features, caption):
+    def forward(self, features, story, captions):
         """
         :param features: (batch_size, 5, feat_size)
         :param caption: (batch_size, 5, seq_length)
         :return:
         """
+
+        embedding = Variable(self.emb(captions).data)
+
+        embedding = torch.permute(embedding, (0, 2, 1, 3))
+        x = F.conv2d(embedding, self.kernels)
+        out_x = x.view(-1, x.size(3))
+
         # encode the visual features
         out_e, _ = self.encoder(features)
-
         # reshape the inputs, making the sentence generation separately
         out_e = out_e.view(-1, out_e.size(2))
-        caption = caption.view(-1, caption.size(2))
+
+        C = torch.stack([out_e,out_x], dim=2)
+        combined = torch.mean(C, 2)
+
+        story = story.view(-1, story.size(2))
 
         ############################# decoding stage ##############################
-        batch_size = out_e.size(0)
+        # batch_size = out_e.size(0)
+        batch_size = combined.size(0)
 
         # initialize decoder's state
         # state_d = self.init_hidden(batch_size, bi=False, dim=self.hidden_dim)
         state_d = self.init_hidden_with_feature(features)
 
-        last_word = Variable(torch.FloatTensor(batch_size).long().zero_()).cuda()
+        # last_word = Variable(torch.FloatTensor(batch_size).long().zero_()).cuda()
+        last_word = Variable(torch.FloatTensor(batch_size).long().zero_())
         outputs = []
 
         for i in range(self.seq_length):
-            log_probs, state_d = self.decode(out_e, last_word, state_d)
+            log_probs, state_d = self.decode(combined, last_word, state_d)
             outputs.append(log_probs)
 
             # choose the word
             if self.ss_prob > 0.0:
-                sample_prob = torch.FloatTensor(batch_size).uniform_(0, 1).cuda()
+                # sample_prob = torch.FloatTensor(batch_size).uniform_(0, 1).cuda()
+                sample_prob = torch.FloatTensor(batch_size).uniform_(0, 1)
                 sample_mask = sample_prob < self.ss_prob
                 if sample_mask.sum() == 0:
-                    last_word = caption[:, i].clone()
+                    last_word = story[:, i].clone()
                 else:
                     sample_ind = sample_mask.nonzero().view(-1)
-                    last_word = caption[:, i].data.clone()
+                    last_word = story[:, i].data.clone()
                     # fetch prev distribution: shape Nx(M+1)
                     prob_prev = torch.exp(log_probs.data)
                     last_word.index_copy_(0, sample_ind,
                                           torch.multinomial(prob_prev, 1).view(-1).index_select(0, sample_ind))
                     last_word = Variable(last_word)
             else:
-                last_word = caption[:, i].clone()
+                last_word = story[:, i].clone()
 
             # break condition
-            if i >= 1 and caption[:, i].data.sum() == 0:
+            if i >= 1 and story[:, i].data.sum() == 0:
                 break
 
         outputs = torch.cat([_.unsqueeze(1) for _ in outputs], 1)  # batch_size * 5, -1, vocab_size
         return outputs.view(-1, self.story_size, outputs.size(1), self.vocab_size)
 
-    def sample(self, features, sample_max, rl_training=False, pad=False):
+    def sample(self, features, captions, sample_max, rl_training=False, pad=False):
+        
+        embedding = Variable(self.emb(captions).data)
+
+        # batch x seq_len x emb_dim -> batch x 1 x seq_len x emb_dim
+        # x = F.relu(self.conv(embedding)).squeeze(3)
+        embedding = torch.permute(embedding, (0, 2, 1, 3))
+        x = F.conv2d(embedding, self.kernels)
+        out_x = x.view(-1, x.size(3))
+
         # encode the visual features
         out_e, _ = self.encoder(features)
-
         # reshape the inputs, making the sentence generation separately
         out_e = out_e.view(-1, out_e.size(2))
 
+        # combined = torch.vstack((out_e, out_x))
+
+        C = torch.stack([out_e,out_x], dim=2)
+        combined = torch.mean(C, 2)
+
+        # print("Combined Shape ", combined.shape)
+
         ###################### Decoding stage ###############################
-        batch_size = out_e.size(0)
+        # batch_size = out_e.size(0)
+        batch_size = combined.size(0)
 
         # initialize decoder's state
         # state_d = self.init_hidden(batch_size, bi=False, dim=self.hidden_dim)
@@ -177,15 +214,18 @@ class BaseModel(nn.Module):
         if rl_training:
             baseline = []
 
-        last_word = torch.FloatTensor(batch_size).long().zero_().cuda()
+        # last_word = torch.FloatTensor(batch_size).long().zero_().cuda()
+        last_word = torch.FloatTensor(batch_size).long().zero_()
         for t in range(self.seq_length):
             last_word = Variable(last_word)
 
-            log_probs, state_d = self.decode(out_e, last_word, state_d, True)
+            # log_probs, state_d = self.decode(out_e, last_word, state_d, True)
+            log_probs, state_d = self.decode(combined, last_word, state_d, True)
             if t < 6:
                 mask = np.zeros((batch_size, log_probs.size(-1)), 'float32')
                 mask[:, 0] = -1000
-                mask = Variable(torch.from_numpy(mask)).cuda()
+                # mask = Variable(torch.from_numpy(mask)).cuda()
+                mask = Variable(torch.from_numpy(mask))
                 log_probs = log_probs + mask
 
             if sample_max:
@@ -194,7 +234,8 @@ class BaseModel(nn.Module):
             else:
                 # fetch prev distribution: shape Nx(M+1)
                 prob_prev = torch.exp(log_probs.data).cpu()
-                last_word = torch.multinomial(prob_prev, 1).cuda()
+                # last_word = torch.multinomial(prob_prev, 1).cuda()
+                last_word = torch.multinomial(prob_prev, 1)
                 # gather the logprobs at sampled positions
                 sample_log_prob = log_probs.gather(1, Variable(last_word))
                 # flatten indices for downstream processing
@@ -251,7 +292,8 @@ class BaseModel(nn.Module):
             out_e_k = out_e[k].unsqueeze(0).expand(beam_size, out_e.size(1)).contiguous()
             state_d_k = state_d[:, k, :].unsqueeze(1).expand(state_d.size(0), beam_size, state_d.size(2)).contiguous()
 
-            last_word = Variable(torch.FloatTensor(beam_size).long().zero_().cuda())  # <BOS>
+            # last_word = Variable(torch.FloatTensor(beam_size).long().zero_().cuda())  # <BOS>
+            last_word = Variable(torch.FloatTensor(beam_size).long().zero_()) 
             log_probs, state_d_k = self.decode(out_e_k, last_word, state_d_k, True)
             log_probs[:, 1] = log_probs[:, 1] - 1000  # never produce <UNK> token
             neg_log_probs = -log_probs
@@ -272,8 +314,11 @@ class BaseModel(nn.Module):
                 all_masks = all_masks[:, indexes]
                 all_costs = all_costs[:, indexes]
 
-                last_word = Variable(torch.from_numpy(outputs)).cuda()
-                state_d_k = Variable(torch.from_numpy(new_state_d)).cuda()
+                # last_word = Variable(torch.from_numpy(outputs)).cuda()
+                # state_d_k = Variable(torch.from_numpy(new_state_d)).cuda()
+
+                last_word = Variable(torch.from_numpy(outputs))
+                state_d_k = Variable(torch.from_numpy(new_state_d))
 
                 log_probs, state_d_k = self.decode(out_e_k, last_word, state_d_k, True)
 
@@ -291,19 +336,29 @@ class BaseModel(nn.Module):
 
         return topK
 
-    def predict(self, features, beam_size=5):
+    def predict(self, features, captions, beam_size=5):
         assert beam_size <= self.vocab_size and beam_size > 0
         if beam_size == 1:  # if beam_size is 1, then do greedy decoding, otherwise use beam search
-            return self.sample(features, sample_max=True, rl_training=False)
+            return self.sample(features, captions, sample_max=True, rl_training=False)
 
+        embedding = Variable(self.emb(captions).data)
+
+        # batch x seq_len x emb_dim -> batch x 1 x seq_len x emb_dim
+        # x = F.relu(self.conv(embedding)).squeeze(3)
+        embedding = torch.permute(embedding, (0, 2, 1, 3))
+        x = F.conv2d(embedding, self.kernels)
+        out_x = x.view(-1, x.size(3))
         # encode the visual features
         out_e, _ = self.encoder(features)
 
         # reshape the inputs, making the sentence generation separately
         out_e = out_e.view(-1, out_e.size(2))
 
+        C = torch.stack([out_e,out_x], dim=2)
+        combined = torch.mean(C, 2)
+
         ####################### decoding stage ##################################
-        batch_size = out_e.size(0)
+        batch_size = combined.size(0)
 
         # initialize decoder's state
         # state_d = self.init_hidden(batch_size, bi=False, dim=self.hidden_dim)
@@ -314,7 +369,7 @@ class BaseModel(nn.Module):
 
         # lets process the videos independently for now, for simplicity
         for k in range(batch_size):
-            out_e_k = out_e[k].unsqueeze(0).expand(beam_size, out_e.size(1)).contiguous()
+            out_e_k = out_e[k].unsqueeze(0).expand(beam_size, combined.size(1)).contiguous()
             state_d_k = state_d[:, k, :].unsqueeze(1).expand(state_d.size(0), beam_size, state_d.size(2)).contiguous()
 
             last_word = Variable(torch.FloatTensor(beam_size).long().zero_())  # <BOS>

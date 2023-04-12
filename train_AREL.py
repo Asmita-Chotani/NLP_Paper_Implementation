@@ -60,7 +60,7 @@ def train(opt):
     opt.vocab_size = dataset.get_vocab_size()
     opt.seq_length = dataset.get_story_length()
 
-    dataset.set_option(data_type={'whole_story': False, 'split_story': True, 'caption': False})
+    dataset.set_option(data_type={'whole_story': False, 'split_story': True, 'caption': True})
 
     dataset.train()
     train_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=opt.shuffle, num_workers=0)
@@ -86,7 +86,7 @@ def train(opt):
     if os.path.exists(os.path.join(logger.log_dir, 'disc-model.pth')):
         logging.info("loading pretrained RewardModel")
         disc.load_state_dict(torch.load(os.path.join(logger.log_dir, 'disc-model.pth'), map_location=torch.device('cpu')))
-    #disc.cuda()
+    # disc.cuda()
 
     # set up optimizer
     optimizer = setup_optimizer(opt, model)
@@ -102,11 +102,20 @@ def train(opt):
         start = time.time()
         for iter, batch in enumerate(train_loader):
             logger.iteration += 1
-            #torch.cuda.synchronize()
+            # torch.cuda.synchronize()
+
+            # feature_fc = Variable(batch['feature_fc']).cuda()
+            # target = Variable(batch['split_story']).cuda()
+            # caption = Variable(batch['caption']).cuda()
 
             feature_fc = Variable(batch['feature_fc'])
             target = Variable(batch['split_story'])
+            caption = Variable(batch['caption'])
             index = batch['index']
+
+            # print(feature_fc.shape)
+            # print(target.shape)
+            # print(caption.shape)
 
             optimizer.zero_grad()
             disc_optimizer.zero_grad()
@@ -115,16 +124,17 @@ def train(opt):
                 model.eval()
                 disc.train()
                 if opt.decoding_method_DISC == 'sample':
-                    seq, seq_log_probs, baseline = model.sample(feature_fc, sample_max=False, rl_training=True,
+                    seq, seq_log_probs, baseline = model.sample(feature_fc, caption, sample_max=False, rl_training=True,
                                                                 pad=True)
                 elif opt.decoding_method_DISC == 'greedy':
-                    seq, seq_log_probs, baseline = model.sample(feature_fc, sample_max=True, rl_training=True,
+                    seq, seq_log_probs, baseline = model.sample(feature_fc, caption, sample_max=True, rl_training=True,
                                                                 pad=True)
             else:
                 model.train()
                 disc.eval()
-                seq, seq_log_probs, baseline = model.sample(feature_fc, sample_max=False, rl_training=True, pad=True)
+                seq, seq_log_probs, baseline = model.sample(feature_fc, caption, sample_max=False, rl_training=True, pad=True)
 
+            # seq = Variable(seq).cuda()
             seq = Variable(seq)
             mask = (seq > 0).float()
             mask = to_contiguous(
@@ -132,6 +142,8 @@ def train(opt):
             normed_seq_log_probs = (seq_log_probs * mask).sum(-1) / mask.sum(-1)
 
             gen_score = disc(seq.view(-1, seq.size(2)), feature_fc.view(-1, feature_fc.size(2)))
+
+            # print(str(normed_seq_log_probs.shape) + " " + str(gen_score.shape))
 
             if flag.flag == "Disc":
                 gt_score = disc(target.view(-1, target.size(2)), feature_fc.view(-1, feature_fc.size(2)))
@@ -141,33 +153,34 @@ def train(opt):
                 avg_neg_score = torch.mean(gen_score)
 
                 if logger.iteration % 5 == 0:
-                    logging.info("pos reward {} neg reward {}".format(avg_pos_score.data[0], avg_neg_score.data[0]))
-                    print("PREDICTION: ", utils.decode_story(dataset.get_vocab(), seq[:1].data)[0])
-                    print("GROUND TRUTH: ", utils.decode_story(dataset.get_vocab(), target[:1].data)[0])
+                    logging.info("pos reward {} neg reward {}".format(avg_pos_score.data.item(), avg_neg_score.data.item()))
+                    # print("PREDICTION: ", utils.decode_story(dataset.get_vocab(), seq[:1].data)[0])
+                    # print("GROUND TRUTH: ", utils.decode_story(dataset.get_vocab(), target[:1].data)[0])
             else:
-                rewards = Variable(gen_score.data - 0 * normed_seq_log_probs.data)
+                rewards = Variable(gen_score.data)
+                # - 0.0001 * normed_seq_log_probs.data
                 #with open("/tmp/reward.txt", "a") as f:
                 #    print(" ".join(map(str, rewards.data.cpu().numpy())), file=f)
                 loss, avg_score = rl_crit(seq.data, seq_log_probs, baseline, index, rewards)
                 # if logger.iteration % opt.losses_log_every == 0:
                 avg_pos_score = torch.mean(gen_score)
                 logging.info(
-                    "average reward: {} average IRL score: {}".format(avg_score.data[0], avg_pos_score.data[0]))
+                    "average reward: {} average IRL score: {}".format(avg_score.data.item(), avg_pos_score.data.item()))
 
             if flag.flag == "Disc":
                 loss.backward()
                 nn.utils.clip_grad_norm(disc.parameters(), opt.grad_clip, norm_type=2)
                 disc_optimizer.step()
             else:
-                tf_loss = crit(model(feature_fc, target), target)
-                print("rl_loss / tf_loss = ", loss.data[0] / tf_loss.data[0])
+                tf_loss = crit(model(feature_fc, target, caption), target)
+                print("rl_loss / tf_loss = ", loss.data.item() / tf_loss.data.item())
                 loss = opt.rl_weight * loss + (1 - opt.rl_weight) * tf_loss
                 loss.backward()
                 nn.utils.clip_grad_norm(model.parameters(), opt.grad_clip, norm_type=2)
                 optimizer.step()
 
-            train_loss = loss.data[0]
-            #torch.cuda.synchronize()
+            train_loss = loss.data.item()
+            # torch.cuda.synchronize()
 
             # Write the training loss summary
             if logger.iteration % opt.losses_log_every == 0:
@@ -213,7 +226,8 @@ def test(opt):
     dataset = VISTDataset(opt)
     opt.vocab_size = dataset.get_vocab_size()
     opt.seq_length = dataset.get_story_length()
-
+    dataset.set_option(data_type={'whole_story': False, 'split_story': False, 'caption': True})
+    print('caption' in dataset)
     dataset.test()
     test_loader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=0)
     evaluator = Evaluator(opt, 'test')

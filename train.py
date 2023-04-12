@@ -93,7 +93,7 @@ def train(opt):
 
     # set up model
     model = models.setup(opt)
-    # model.cuda()
+    model.cuda()
 
     # set up optimizer
     optimizer = setup_optimizer(opt, model)
@@ -127,12 +127,12 @@ def train(opt):
             if opt.start_rl >= 0 and epoch >= opt.start_rl:  # reinforcement learning
                 seq, seq_log_probs, baseline = model.sample(feature_fc, sample_max=False, rl_training=True)
                 rl_loss, avg_score = rl_crit(seq, seq_log_probs, baseline, index)
-                print(rl_loss.data[0] / loss.data[0])
+                print(rl_loss.data.item() / loss.data.item())
                 loss = opt.rl_weight * rl_loss + (1 - opt.rl_weight) * loss
                 logging.info("average {} score: {}".format(opt.reward_type, avg_score))
 
             loss.backward()
-            train_loss = loss.data[0]
+            train_loss = loss.data.item()
 
             nn.utils.clip_grad_norm(model.parameters(), opt.grad_clip, norm_type=2)
             optimizer.step()

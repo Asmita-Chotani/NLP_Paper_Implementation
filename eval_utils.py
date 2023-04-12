@@ -110,26 +110,33 @@ class Evaluator:
         for iter, batch in enumerate(loader):
             iter_start = time.time()
 
+            # feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
+            # target = Variable(batch['split_story'], volatile=True).cuda()
+            # conv_feature = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
+            # caption = Variable(batch['caption'], volatile=True).cuda()
+
             feature_fc = Variable(batch['feature_fc'], volatile=True)
             target = Variable(batch['split_story'], volatile=True)
             conv_feature = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
+            caption = Variable(batch['caption'], volatile=True)
 
             count += feature_fc.size(0)
 
             if side_model is not None:
-                story, _ = side_model.predict(feature_fc.view(-1, feature_fc.shape[2]), 1)
+                story, _ = side_model.predict(feature_fc.view(-1, feature_fc.shape[2]), caption, 1)
+                # story = Variable(story).cuda()
                 story = Variable(story)
                 if conv_feature is not None:
-                    output = model(feature_fc, target, story, conv_feature)
+                    output = model(feature_fc, target, story, conv_feature, caption)
                 else:
-                    output = model(feature_fc, target, story)
+                    output = model(feature_fc, target, story, caption)
             else:
                 if conv_feature is not None:
-                    output = model(feature_fc, target, conv_feature)
+                    output = model(feature_fc, target, conv_feature, caption)
                 else:
-                    output = model(feature_fc, target)
+                    output = model(feature_fc, target, caption)
 
-            loss = crit(output, target).data[0]
+            loss = crit(output, target).data.item()
             loss_sum += loss
             loss_evals += 1
 
@@ -143,7 +150,7 @@ class Evaluator:
                 if conv_feature is not None:
                     results, _ = model.predict(feature_fc, conv_feature, beam_size=opt.beam_size)
                 else:
-                    results, _ = model.predict(feature_fc, beam_size=opt.beam_size)
+                    results, _ = model.predict(feature_fc, caption, beam_size=opt.beam_size)
             stories = utils.decode_story(dataset.get_vocab(), results)
 
             indexes = batch['index'].numpy()
@@ -182,12 +189,19 @@ class Evaluator:
         for iter, batch in enumerate(loader):
             iter_start = time.time()
 
+            # feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
+            # caption = Variable(batch['caption'], volatile=True).cuda()
+            # feature_conv = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
+            
             feature_fc = Variable(batch['feature_fc'], volatile=True)
+            caption = Variable(batch['caption'], volatile=True)
             feature_conv = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
+            
+
             if feature_conv is not None:
                 results, _ = model.predict(feature_fc, feature_conv, beam_size=opt.beam_size)
             else:
-                results, _ = model.predict(feature_fc, beam_size=opt.beam_size)
+                results, _ = model.predict(feature_fc, caption, beam_size=opt.beam_size)
 
             sents = utils.decode_story(dataset.get_vocab(), results)
 
@@ -229,8 +243,12 @@ class Evaluator:
         for iter, batch in enumerate(loader):
             iter_start = time.time()
 
+            # feature_fc = Variable(batch['feature_fc'], volatile=True).cuda()
+            # conv_feature = Variable(batch['feature_conv'], volatile=True).cuda() if 'feature_conv' in batch else None
+            
             feature_fc = Variable(batch['feature_fc'], volatile=True)
             conv_feature = Variable(batch['feature_conv'], volatile=True) if 'feature_conv' in batch else None
+
             count += feature_fc.size(0)
             if conv_feature is not None:
                 results, _ = model.predict(feature_fc, conv_feature, beam_size=opt.beam_size)

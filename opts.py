@@ -98,13 +98,13 @@ def parse_opt():
                         help='Maximum scheduled sampling prob.')
 
     # Evaluation/Checkpointing
-    parser.add_argument('--metric', type=str, default='METEOR',
+    parser.add_argument('--metric', type=str, default='Bleu_4',
                         help="XE | CIDEr | ROUGE_L | METEOR | Bleu_4 | Bleu_3")
-    parser.add_argument('--save_checkpoint_every', type=int, default=1000,
+    parser.add_argument('--save_checkpoint_every', type=int, default=100,
                         help='how often to save a model checkpoint (in iterations)')
     parser.add_argument('--checkpoint_path', type=str, default='data/save',
                         help='directory to store checkpointed models')
-    parser.add_argument('--losses_log_every', type=int, default=10,
+    parser.add_argument('--losses_log_every', type=int, default=1,
                         help='How often do we snapshot losses, for inclusion in the progress dump? (0 = disable)')
     parser.add_argument('--load_best_score', type=bool, default=True,
                         help='whether to load previous best score when resuming training.')

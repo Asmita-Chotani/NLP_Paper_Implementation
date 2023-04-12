@@ -13,7 +13,8 @@ import logging
 class TensorBoard:
     def __init__(self, opt):
         try:
-            import tensorflow as tf
+            import tensorflow.compat.v1 as tf
+            tf.disable_v2_behavior()
         except ImportError:
             logging.info("Tensorflow not installed; No tensorboard logging.")
             tf = None

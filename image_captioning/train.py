@@ -9,6 +9,11 @@ from build_vocab import Vocabulary
 from model import EncoderCNN, DecoderRNN
 from torch.nn.utils.rnn import pack_padded_sequence
 from torchvision import transforms
+import math
+import json
+import os.path as osp
+from collections import OrderedDict
+
 
 
 # Device configuration
@@ -31,9 +36,24 @@ def main(args):
     with open(args.vocab_path, 'rb') as f:
         vocab = pickle.load(f)
     
+    print(vocab)
+
+    # Open the TRAIN JSON file
+    train_caption_path = json.load(open("../AREL-data-process/train_caption_data.json"))
+
+    # # Open the VAL JSON file
+    # with open("../AREL-data-process/val_vaption_data.json", 'r') as f:
+    #     # Load the contents of the file as a dictionary
+    #     val_caption_path = json.load(f)
+
+    # # Open the VAL JSON file
+    # with open("../AREL-data-process/val_vaption_data.json", 'r') as f:
+    #     # Load the contents of the file as a dictionary
+    #     val_caption_path = json.load(f)
+
     # Build data loader
-    data_loader = get_loader(args.image_dir, args.caption_path, vocab, 
-                             transform, args.batch_size,
+    data_loader = get_loader("../VIST/resnet_features/fc/train", train_caption_path, vocab, 
+                             args.batch_size,
                              shuffle=True, num_workers=args.num_workers) 
 
     # Build the models
@@ -45,20 +65,25 @@ def main(args):
     params = list(decoder.parameters()) + list(encoder.linear.parameters()) + list(encoder.bn.parameters())
     optimizer = torch.optim.Adam(params, lr=args.learning_rate)
     
+    max_loss= math.inf
     # Train the models
     total_step = len(data_loader)
+    ctr=0
     for epoch in range(args.num_epochs):
+        train_loss= 0.0
         for i, (images, captions, lengths) in enumerate(data_loader):
-            
+            ctr=ctr+1
             # Set mini-batch dataset
             images = images.to(device)
             captions = captions.to(device)
             targets = pack_padded_sequence(captions, lengths, batch_first=True)[0]
             
+            # print(images.shape)
             # Forward, backward and optimize
             features = encoder(images)
             outputs = decoder(features, captions, lengths)
             loss = criterion(outputs, targets)
+            train_loss=train_loss+loss.item()
             decoder.zero_grad()
             encoder.zero_grad()
             loss.backward()
@@ -70,13 +95,26 @@ def main(args):
                       .format(epoch, args.num_epochs, i, total_step, loss.item(), np.exp(loss.item()))) 
                 
             # Save the model checkpoints
-            if (i+1) % args.save_step == 0:
+            if ctr % args.save_step == 0:
                 torch.save(decoder.state_dict(), os.path.join(
                     args.model_path, 'decoder-{}-{}.ckpt'.format(epoch+1, i+1)))
                 torch.save(encoder.state_dict(), os.path.join(
                     args.model_path, 'encoder-{}-{}.ckpt'.format(epoch+1, i+1)))
+        
+        
+        if train_loss<max_loss:
+            torch.save(decoder.state_dict(), os.path.join(
+                args.model_path, 'decoder_best.ckpt'))
+            torch.save(encoder.state_dict(), os.path.join(
+                args.model_path, 'encoder_best.ckpt'))
+            max_loss=train_loss
 
-
+    
+    torch.save(decoder.state_dict(), os.path.join(
+                args.model_path, 'decoder_LAST.ckpt'))
+    torch.save(encoder.state_dict(), os.path.join(
+                args.model_path, 'encoder_LAST.ckpt'))
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_path', type=str, default='models/' , help='path for saving trained models')
@@ -92,8 +130,8 @@ if __name__ == '__main__':
     parser.add_argument('--hidden_size', type=int , default=512, help='dimension of lstm hidden states')
     parser.add_argument('--num_layers', type=int , default=1, help='number of layers in lstm')
     
-    parser.add_argument('--num_epochs', type=int, default=5)
-    parser.add_argument('--batch_size', type=int, default=128)
+    parser.add_argument('--num_epochs', type=int, default=50)
+    parser.add_argument('--batch_size', type=int, default=256)
     parser.add_argument('--num_workers', type=int, default=2)
     parser.add_argument('--learning_rate', type=float, default=0.001)
     args = parser.parse_args()

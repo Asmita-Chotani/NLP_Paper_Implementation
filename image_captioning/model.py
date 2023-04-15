@@ -18,8 +18,10 @@ class EncoderCNN(nn.Module):
         # with torch.no_grad():
         #     features = self.resnet(images)
         features = images
-        # features = features.reshape(features.size(0), -1)
-        features = features.reshape(-1, features.size(0))
+        # print("1: ",features.shape)
+        # features = features.reshape(features.size(0), -1)   #shape-(256,2048)
+        features = features.reshape(-1, features.size(0)) #shape-(2048,256) --needed for testing
+        # print("2: ",features.shape)
         # print(features.shape)
         features = self.bn(self.linear(features))
         return features

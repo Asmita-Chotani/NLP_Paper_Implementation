@@ -2,7 +2,7 @@ import nltk
 import pickle
 import argparse
 from collections import Counter
-from pycocotools.coco import COCO
+import json
 
 class Vocabulary(object):
     """Simple vocabulary wrapper."""
@@ -25,13 +25,15 @@ class Vocabulary(object):
     def __len__(self):
         return len(self.word2idx)
 
-def build_vocab(json, threshold):
+def build_vocab(json2, threshold):
     """Build a simple vocabulary wrapper."""
-    coco = COCO(json)
+
+    train_caption_path = json.load(open("../AREL-data-process/train_caption_data.json"))
+
     counter = Counter()
-    ids = coco.anns.keys()
+    ids = train_caption_path.keys()
     for i, id in enumerate(ids):
-        caption = str(coco.anns[id]['caption'])
+        caption = str(train_caption_path[id])
         tokens = nltk.tokenize.word_tokenize(caption.lower())
         counter.update(tokens)
 
@@ -54,7 +56,7 @@ def build_vocab(json, threshold):
     return vocab
 
 def main(args):
-    vocab = build_vocab(json=args.caption_path, threshold=args.threshold)
+    vocab = build_vocab(json2=args.caption_path, threshold=args.threshold)
     vocab_path = args.vocab_path
     with open(vocab_path, 'wb') as f:
         pickle.dump(vocab, f)
@@ -69,7 +71,7 @@ if __name__ == '__main__':
                         help='path for train annotation file')
     parser.add_argument('--vocab_path', type=str, default='./data/vocab.pkl', 
                         help='path for saving vocabulary wrapper')
-    parser.add_argument('--threshold', type=int, default=4, 
+    parser.add_argument('--threshold', type=int, default=2, 
                         help='minimum word count threshold')
     args = parser.parse_args()
     main(args)

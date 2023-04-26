@@ -1,7 +1,5 @@
-# ImagiNarrate: Building a Narrative with Images and Generated Captions}
+# ImagiNarrate: Building a Narrative with Images and Generated Captions
 
-
-# test commit
 
 This repo is the implementation of our NLP Project "ImagiNarrate: Building a Narrative with Images and Generated Captions", which also provides a codebase for the task of visual storytelling.
 

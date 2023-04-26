@@ -1,0 +1,64 @@
+04-21 15:18 INFO     Tensorflow not installed; No tensorboard logging.
+04-21 15:18 INFO     Option settings:
+04-21 15:18 INFO     debug                                   : False
+04-21 15:18 INFO     option                                  : test
+04-21 15:18 INFO     id                                      : default
+04-21 15:18 INFO     data_dir                                : VIST
+04-21 15:18 INFO     desc_h5                                 : VIST/description.h5
+04-21 15:18 INFO     story_h5                                : VIST/story.h5
+04-21 15:18 INFO     full_story_h5                           : VIST/full_story.h5
+04-21 15:18 INFO     story_line_json                         : VIST/story_line.json
+04-21 15:18 INFO     resume_from                             : None
+04-21 15:18 INFO     start_from_model                        : data/save//AREL/model-best.pth
+04-21 15:18 INFO     model                                   : BaseModel
+04-21 15:18 INFO     task                                    : story_telling
+04-21 15:18 INFO     rnn_type                                : gru
+04-21 15:18 INFO     hidden_dim                              : 512
+04-21 15:18 INFO     num_layers                              : 1
+04-21 15:18 INFO     word_embed_dim                          : 512
+04-21 15:18 INFO     feat_size                               : 2048
+04-21 15:18 INFO     conv_feat_size                          : 100352
+04-21 15:18 INFO     use_conv                                : False
+04-21 15:18 INFO     story_size                              : 5
+04-21 15:18 INFO     with_position                           : False
+04-21 15:18 INFO     max_epochs                              : 100
+04-21 15:18 INFO     shuffle                                 : True
+04-21 15:18 INFO     batch_size                              : 64
+04-21 15:18 INFO     workers                                 : 8
+04-21 15:18 INFO     grad_clip                               : 10
+04-21 15:18 INFO     visual_dropout                          : 0.2
+04-21 15:18 INFO     dropout                                 : 0.5
+04-21 15:18 INFO     beam_size                               : 3
+04-21 15:18 INFO     optim                                   : Adam
+04-21 15:18 INFO     learning_rate                           : 0.0004
+04-21 15:18 INFO     learning_rate_decay_start               : -1
+04-21 15:18 INFO     learning_rate_decay_every               : 5
+04-21 15:18 INFO     learning_rate_decay_rate                : 0.5
+04-21 15:18 INFO     momentum                                : 0.9
+04-21 15:18 INFO     weight_decay                            : 0
+04-21 15:18 INFO     optim_alpha                             : 0.8
+04-21 15:18 INFO     optim_beta                              : 0.999
+04-21 15:18 INFO     optim_epsilon                           : 1e-08
+04-21 15:18 INFO     start_rl                                : -1
+04-21 15:18 INFO     reward_type                             : METEOR
+04-21 15:18 INFO     rl_weight                               : 0.5
+04-21 15:18 INFO     cached_tokens                           : VIST/VIST-train-words
+04-21 15:18 INFO     use_feature_with_context                : False
+04-21 15:18 INFO     decoding_method_DISC                    : sample
+04-21 15:18 INFO     scheduled_sampling_start                : 0
+04-21 15:18 INFO     scheduled_sampling_increase_every       : 5
+04-21 15:18 INFO     scheduled_sampling_increase_prob        : 0.05
+04-21 15:18 INFO     scheduled_sampling_max_prob             : 0.25
+04-21 15:18 INFO     metric                                  : Bleu_4
+04-21 15:18 INFO     save_checkpoint_every                   : 100
+04-21 15:18 INFO     checkpoint_path                         : data/save
+04-21 15:18 INFO     losses_log_every                        : 1
+04-21 15:18 INFO     load_best_score                         : True
+04-21 15:18 INFO     prefix                                  : fc/
+04-21 15:18 INFO     always                                  : None
+04-21 15:18 INFO     D_iter                                  : 100
+04-21 15:18 INFO     G_iter                                  : 100
+04-21 15:18 INFO     activation                              : sign
+04-21 15:19 INFO     Initialize the parameters of the model
+04-21 15:19 INFO     Start from pretrained model
+04-21 15:19 INFO     Evaluating...

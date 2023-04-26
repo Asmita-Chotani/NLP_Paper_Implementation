@@ -1,11 +1,22 @@
 # ImagiNarrate: Building a Narrative with Images and Generated Captions
 
+## Abstract
+
+In this paper, we introduce a new natural language processing (NLP) approach to solve the
+problem of visual storytelling that utilizes image features to generate captions and subsequently
+develop a coherent story line for the images. By incorporating image features in
+the caption generation process, our proposed approach aims to provide a more relevant and
+informative description of the images that can be used to build a cohesive and engaging narrative.
+We evaluate our model in comparison to the AREL model (Wang et al., 2018) used
+for story generation on the basis of traditional metrics like Meteor and Bleu as well as human
+evaluation of the generated stories.
 
 This repo is the implementation of our NLP Project "ImagiNarrate: Building a Narrative with Images and Generated Captions", which also provides a codebase for the task of visual storytelling.
-
 In the project, we introduce a new natural language processing (NLP) approach to solve the problem of visual storytelling that utilizes image features to generate captions and subsequently develop a coherent story line for the images.
-
 For more details on the baseline model, please check the latest version of the paper: [https://arxiv.org/abs/1804.09160](https://arxiv.org/abs/1804.09160).
+
+
+Downloaded the preprocessed ResNet-152 features [here](https://vist-arel.s3.amazonaws.com/resnet_features.zip) for Image Embeddings.
 
 <p align="demo">
 <img src="demo1.png">
@@ -14,7 +25,6 @@ For more details on the baseline model, please check the latest version of the p
 ## Prerequisites 
 - Python 2.7
 - PyTorch 0.3
-
 
 ## Usage
 ### 1. Setup
@@ -25,9 +35,9 @@ git clone --recursive https://github.com/Asmita-Chotani/NLP_Paper_Implementation
 ```
 
 Download the preprocessed ResNet-152 features [here](https://vist-arel.s3.amazonaws.com/resnet_features.zip) and unzip it into `DATADIR/resnet_features`, where DATADIR is the VIST folder.
+Check the file `opt.py` for more options, where you can play with some other settings.
 
-
-### 2. AREL Learning
+### 3. AREL Learning
 To train an AREL model, run
 
 ```
@@ -37,22 +47,14 @@ python train_AREL.py --id AREL --start_from_model PRETRAINED_MODEL
 Note that `PRETRAINED_MODEL` can be `data/save/XE/model.pth` or some other saved models. 
 Check `opt.py` for more information.
 
-
-### 3. Testing
+### 4. Testing
 To test the model's performance, run
-
 ```
 python train_AREL.py --option test --beam_size 3 --start_from_model data/save/AREL/model.pth
 ```
 
-### Reproducing our results
-We uploaded our checkpoints and meta files to the [IRL-ini-iter100-*](https://github.com/eric-xw/AREL/tree/master/data/save). Please load the model from these folders by running
-
-```
-python train.py --option test --beam_size 3 --start_from_model [best_model_path]
-```
-
-## If you find this code useful, please cite the paper
+## Acknowledgements & References
+* [VIST evaluation code](https://github.com/lichengunc/vist_eval)
 ```
 @InProceedings{xwang-2018-AREL,
   author = 	"Wang, Xin and Chen, Wenhu and Wang, Yuan-Fang and Wang, William Yang",
@@ -63,8 +65,6 @@ python train.py --option test --beam_size 3 --start_from_model [best_model_path]
   pages = 	"899--909",
   location = 	"Melbourne, Australia",
   url = 	"http://aclweb.org/anthology/P18-1083"
+  git = "https://github.com/eric-xw/AREL.git"
 }
 ```
-
-## Acknowledgement
-* [VIST evaluation code](https://github.com/lichengunc/vist_eval)

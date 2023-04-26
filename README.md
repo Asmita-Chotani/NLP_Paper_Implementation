@@ -26,16 +26,8 @@ git clone --recursive https://github.com/Asmita-Chotani/NLP_Paper_Implementation
 
 Download the preprocessed ResNet-152 features [here](https://vist-arel.s3.amazonaws.com/resnet_features.zip) and unzip it into `DATADIR/resnet_features`, where DATADIR is the VIST folder.
 
-### 2. Supervised Learning
-We use cross entropy loss to warm start the model first:
 
-```
-python train.py --id XE --data_dir DATADIR --start_rl -1
-```
-
-Check the file `opt.py` for more options, where you can play with some other settings.
-
-### 3. AREL Learning
+### 2. AREL Learning
 To train an AREL model, run
 
 ```
@@ -45,23 +37,9 @@ python train_AREL.py --id AREL --start_from_model PRETRAINED_MODEL
 Note that `PRETRAINED_MODEL` can be `data/save/XE/model.pth` or some other saved models. 
 Check `opt.py` for more information.
 
-### 4. Monitor your training
-TensorBoard is used to monitor the training process. Suppose you set the option `checkpoint_path` as `data/save`, then run
 
-```
-tensorboard --logdir data/save/tensorboard
-```
-
-And then open your browser and go to `[IP address]:6006` (the default port for tensorboard is `6006`).
-
-### 5. Testing
+### 3. Testing
 To test the model's performance, run
-
-```
-python train.py --option test --beam_size 3 --start_from_model data/save/XE/model.pth
-```
-
-or 
 
 ```
 python train_AREL.py --option test --beam_size 3 --start_from_model data/save/AREL/model.pth

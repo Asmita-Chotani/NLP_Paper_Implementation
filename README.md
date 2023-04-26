@@ -9,7 +9,7 @@ In the project, we introduce a new natural language processing (NLP) approach to
 For more details on the baseline model, please check the latest version of the paper: [https://arxiv.org/abs/1804.09160](https://arxiv.org/abs/1804.09160).
 
 <p align="demo">
-<img src="demo.png">
+<img src="demo1.png">
 </p>
 
 ## Prerequisites 

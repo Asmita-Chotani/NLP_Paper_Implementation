@@ -44,7 +44,7 @@ To train an AREL model, run
 python train_AREL.py --id AREL --start_from_model PRETRAINED_MODEL
 ```
 
-Note that `PRETRAINED_MODEL` can be `data/save/XE/model.pth` or some other saved models. You can also pretrain on our best model which can be found [here] (https://drive.google.com/file/d/1K1WfMiMqqJFI73JUKpOd5uw9YjzLs2Ff/view?usp=sharing) by saving the model in 'data/save/AREL'.
+Note that `PRETRAINED_MODEL` can be `data/save/XE/model.pth` or some other saved models. You can also pretrain on our best model which can be found [here](https://drive.google.com/file/d/1K1WfMiMqqJFI73JUKpOd5uw9YjzLs2Ff/view?usp=sharing) by saving the model in 'data/save/AREL'.
 Check `opt.py` for more information.
 
 ### 3. Testing
@@ -52,7 +52,7 @@ To test the model's performance, run
 ```
 python train_AREL.py --option test --beam_size 3 --start_from_model BEST_MODEL
 ```
-You can load our best model found [here] (https://drive.google.com/file/d/1K1WfMiMqqJFI73JUKpOd5uw9YjzLs2Ff/view?usp=sharing) by saving the model in 'data/save/AREL' and set that as the BEST_MODEL mentioned in the command.
+You can load our best model found [here](https://drive.google.com/file/d/1K1WfMiMqqJFI73JUKpOd5uw9YjzLs2Ff/view?usp=sharing) by saving the model in 'data/save/AREL' and set that as the BEST_MODEL mentioned in the command.
 
 ## Acknowledgements & References
 * [VIST evaluation code](https://github.com/lichengunc/vist_eval)

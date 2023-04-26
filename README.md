@@ -11,12 +11,8 @@ We evaluate our model in comparison to the AREL model (Wang et al., 2018) used
 for story generation on the basis of traditional metrics like Meteor and Bleu as well as human
 evaluation of the generated stories.
 
-This repo is the implementation of our NLP Project "ImagiNarrate: Building a Narrative with Images and Generated Captions", which also provides a codebase for the task of visual storytelling.
+This repo is the implementation of our NLP Project "ImagiNarrate: Building a Narrative with Images and Generated Captions".
 In the project, we introduce a new natural language processing (NLP) approach to solve the problem of visual storytelling that utilizes image features to generate captions and subsequently develop a coherent story line for the images.
-For more details on the baseline model, please check the latest version of the paper: [https://arxiv.org/abs/1804.09160](https://arxiv.org/abs/1804.09160).
-
-
-Downloaded the preprocessed ResNet-152 features [here](https://vist-arel.s3.amazonaws.com/resnet_features.zip) for Image Embeddings.
 
 <p align="demo">
 <img src="demo1.png">
@@ -44,7 +40,7 @@ To train an AREL model, run
 python train_AREL.py --id AREL --start_from_model PRETRAINED_MODEL
 ```
 
-Note that `PRETRAINED_MODEL` can be `data/save/XE/model.pth` or some other saved models. You can also pretrain on our best model which can be found [here](https://drive.google.com/drive/folders/1HvQ3YBnELZcsvbAI1jCBVM77ewHeRERW?usp=sharing) by saving the model in 'data/save/AREL'.
+Note that `PRETRAINED_MODEL` some saved models. You can use our best model which can be found [here](https://drive.google.com/drive/folders/1HvQ3YBnELZcsvbAI1jCBVM77ewHeRERW?usp=sharing) by saving the model in 'data/save/AREL'.
 Check `opt.py` for more information.
 
 ### 3. Testing

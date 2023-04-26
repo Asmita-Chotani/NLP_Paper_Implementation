@@ -6,6 +6,7 @@
 This repo is the implementation of our NLP Project "ImagiNarrate: Building a Narrative with Images and Generated Captions", which also provides a codebase for the task of visual storytelling.
 
 In the project, we introduce a new natural language processing (NLP) approach to solve the problem of visual storytelling that utilizes image features to generate captions and subsequently develop a coherent story line for the images.
+
 For more details on the baseline model, please check the latest version of the paper: [https://arxiv.org/abs/1804.09160](https://arxiv.org/abs/1804.09160).
 
 <p align="demo">
@@ -15,8 +16,7 @@ For more details on the baseline model, please check the latest version of the p
 ## Prerequisites 
 - Python 2.7
 - PyTorch 0.3
-- TensorFlow (optional, only using the fantastic tensorboard)
-- cuda & cudnn
+
 
 ## Usage
 ### 1. Setup

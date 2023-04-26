@@ -37,7 +37,7 @@ git clone --recursive https://github.com/Asmita-Chotani/NLP_Paper_Implementation
 Download the preprocessed ResNet-152 features [here](https://vist-arel.s3.amazonaws.com/resnet_features.zip) and unzip it into `DATADIR/resnet_features`, where DATADIR is the VIST folder.
 Check the file `opt.py` for more options, where you can play with some other settings.
 
-### 3. AREL Learning
+### 2. AREL Learning
 To train an AREL model, run
 
 ```
@@ -47,7 +47,7 @@ python train_AREL.py --id AREL --start_from_model PRETRAINED_MODEL
 Note that `PRETRAINED_MODEL` can be `data/save/XE/model.pth` or some other saved models. 
 Check `opt.py` for more information.
 
-### 4. Testing
+### 3. Testing
 To test the model's performance, run
 ```
 python train_AREL.py --option test --beam_size 3 --start_from_model data/save/AREL/model.pth

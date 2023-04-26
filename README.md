@@ -21,7 +21,7 @@ For more details on the baseline model, please check the latest version of the p
 Clone this github repository recursively: 
 
 ```
-git clone --recursive https://github.com/eric-xw/AREL.git ./
+git clone --recursive https://github.com/Asmita-Chotani/NLP_Paper_Implementation.git ./
 ```
 
 Download the preprocessed ResNet-152 features [here](https://vist-arel.s3.amazonaws.com/resnet_features.zip) and unzip it into `DATADIR/resnet_features`, where DATADIR is the VIST folder.
